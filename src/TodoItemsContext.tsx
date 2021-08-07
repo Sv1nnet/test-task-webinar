@@ -4,8 +4,11 @@ import {
     useContext,
     useEffect,
     useReducer,
+    useCallback,
     Reducer,
 } from 'react';
+import { addItem, deleteItem, loadState, toggleDone } from './actionCreators';
+import { NotifierContext } from './Notifier';
 
 export interface TodoItem {
     id: string;
@@ -27,7 +30,16 @@ export interface TodoItemsAction {
 }
 
 const TodoItemsContext = createContext<
-    (TodoItemsState & { dispatch: (action: TodoItemsAction) => void }) | null
+    (
+        TodoItemsState
+        & { dispatch: (action: TodoItemsAction) => void }
+        & {
+            add: (data: Partial<TodoItem>) => void,
+            remove: (data: Partial<TodoItem>) => void,
+            toggle: (data: Partial<TodoItem>) => void,
+            load: (data: TodoItemsState) => void,
+        }
+    ) | null
 >(null);
 
 const defaultState: TodoItemsState = { todoItems: [] };
@@ -39,23 +51,31 @@ export const TodoItemsContextProvider = ({
     children?: ReactNode;
 }) => {
     const [state, dispatch] = useReducer<Reducer<TodoItemsState, TodoItemsAction>>(todoItemsReducer, defaultState);
+    const { notify } = useContext(NotifierContext)!
+
+    const add = addItem(state, dispatch, notify)
+    const remove = deleteItem(state, dispatch, notify)
+    const toggle = toggleDone(state, dispatch, notify)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const load = useCallback(loadState(state, dispatch, notify), [])
     
     useEffect(() => {
         const savedState = localStorage.getItem(localStorageKey);
 
         if (savedState) {
             try {
-                dispatch({ type: 'loadState', data: JSON.parse(savedState) });
+                const data = JSON.parse(savedState) as TodoItemsState
+                load(data);
             } catch {}
         }
-    }, []);
+    }, [ load ]);
 
     useEffect(() => {
         localStorage.setItem(localStorageKey, JSON.stringify(state));
     }, [state]);
 
     return (
-        <TodoItemsContext.Provider value={{ ...state, dispatch }}>
+        <TodoItemsContext.Provider value={{ ...state, dispatch, add, remove, load, toggle }}>
             {children}
         </TodoItemsContext.Provider>
     );
@@ -78,22 +98,14 @@ function todoItemsReducer(state: TodoItemsState, action: TodoItemsAction): TodoI
         case 'loadState': {
             return action.data as TodoItemsState;
         }
-        case 'add': {
-            let item = action.data as TodoItem
-            const dateNow = new Date()
-            const itemDate = item.hours && item.minutes
-                ? new Date(dateNow.getFullYear(), dateNow.getMonth(), dateNow.getDate(), +item.hours, +item.minutes )
-                : 0
-
-            item = { ...item, id: generateId(), done: false, date: itemDate.valueOf() }
+        case 'add':
             return {
                 ...state,
                 todoItems: [
-                    { ...item },
+                    { ...(action.data as TodoItem) },
                     ...state.todoItems,
                 ],
             };
-        }
         case 'delete':
             return {
                 ...state,
@@ -119,9 +131,3 @@ function todoItemsReducer(state: TodoItemsState, action: TodoItemsAction): TodoI
             throw new Error();
     }
 }
-
-function generateId() {
-    return `${Date.now().toString(36)}-${Math.floor(
-        Math.random() * 1e16,
-    ).toString(36)}`;
-  }

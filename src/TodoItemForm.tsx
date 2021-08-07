@@ -37,7 +37,7 @@ const useInputStyles = makeStyles(() => ({
 
 export default function TodoItemForm() {
     const classes = useInputStyles();
-    const { dispatch } = useTodoItems();
+    const { add } = useTodoItems();
     const { control, handleSubmit, reset, watch } = useForm();
     const validateTimeInput = (time: string, { target: { value }}: { target: { value: string } }) => {
         if (value === '') return true
@@ -51,7 +51,7 @@ export default function TodoItemForm() {
     return (
         <form
             onSubmit={handleSubmit((formData: TodoItem) => {
-                dispatch({ type: 'add', data: formData });
+                add(formData);
                 reset({ title: '', details: '', hours: '', minutes: '' });
             })}
         >

@@ -6,6 +6,7 @@ import { ThemeProvider } from '@material-ui/styles';
 import { TodoItemsList } from './TodoItems';
 import { TodoItemsContextProvider } from './TodoItemsContext';
 import TodoItemForm from './TodoItemForm';
+import Notifier from './Notifier';
 
 const theme = createMuiTheme({
     palette: {
@@ -20,11 +21,13 @@ const theme = createMuiTheme({
 
 function App() {
     return (
-        <TodoItemsContextProvider>
-            <ThemeProvider theme={theme}>
-                <Content />
-            </ThemeProvider>
-        </TodoItemsContextProvider>
+        <Notifier>
+            <TodoItemsContextProvider>
+                <ThemeProvider theme={theme}>
+                    <Content />
+                </ThemeProvider>
+            </TodoItemsContextProvider>
+        </Notifier>
     );
 }
 

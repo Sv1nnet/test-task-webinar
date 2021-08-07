@@ -73,20 +73,17 @@ const useTodoItemCardStyles = makeStyles({
 
 export const TodoItemCard = function ({ item }: { item: TodoItem }) {
     const classes = useTodoItemCardStyles();
-    const { dispatch } = useTodoItems();
+    const { remove, toggle } = useTodoItems();
 
     const handleDelete = useCallback(
-        () => dispatch({ type: 'delete', data: { id: item.id } }),
-        [item.id, dispatch],
+        () => remove({ id: item.id }),
+        [item.id, remove],
     );
 
     const handleToggleDone = useCallback(
         () =>
-            dispatch({
-                type: 'toggleDone',
-                data: { id: item.id },
-            }),
-        [item.id, dispatch],
+        toggle({ id: item.id }),
+        [item.id, toggle],
     );
 
     const getCardTime = () => {
