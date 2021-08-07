@@ -3,10 +3,10 @@ import Container from '@material-ui/core/Container';
 import Typography from '@material-ui/core/Typography';
 import { createMuiTheme } from '@material-ui/core/styles';
 import { ThemeProvider } from '@material-ui/styles';
-import { TodoItemsList } from './TodoItems';
-import { TodoItemsContextProvider } from './TodoItemsContext';
-import TodoItemForm from './TodoItemForm';
-import Notifier from './Notifier';
+import { TodoItemsList } from '@src/components/todo_items/TodoItems';
+import { TodoItemsContextProvider } from '@context/TodoItemsContext';
+import { TodoItemForm } from '@components/index';
+import Notifier from '@context/Notifier';
 
 const theme = createMuiTheme({
     palette: {

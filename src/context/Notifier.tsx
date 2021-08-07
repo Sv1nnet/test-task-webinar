@@ -1,6 +1,7 @@
 import { createContext, useRef, FC, Dispatch } from 'react'
 import { TodoItem, TodoItemsAction, TodoItemsState } from './TodoItemsContext'
-import { createTimeCheckWorker } from './utils'
+import { createTimeCheckWorker } from '@utils/index'
+import { ADD, REMOVE, TOGGLE_DONE, LOAD_STATE } from '@actions/types/actionTypes'
 
 export type AddNotification = (todoItem: TodoItem) => void
 export type RemoveNotification = (todoItem: Partial<TodoItem>) => void
@@ -59,18 +60,18 @@ const NotifierContextProvider: FC = ({ children }) => {
 
   	const notify: Notify = (state, dispatch) => ({ type, data }) => {
 		switch (type) {
-	  	  	case 'add':
+	  	  	case ADD:
 			addNotification(data as TodoItem)  
 			break;
-	  	case 'delete':
+	  	case REMOVE:
 			removeNotification(data as TodoItem)
 			break;
-	  	case 'toggleDone':
+	  	case TOGGLE_DONE:
 			const item = state.todoItems.find((item) => item.id === (data as TodoItem).id)
 			if (item?.done) addNotification({ ...item, done: !item.done })
 			else removeNotification({ ...item, done: !item?.done })
 			break;
-	  	case 'loadState':
+	  	case LOAD_STATE:
 			initializeNotifications((data as TodoItemsState).todoItems)
 			break;
 	

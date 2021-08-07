@@ -7,8 +7,9 @@ import {
     useCallback,
     Reducer,
 } from 'react';
-import { addItem, deleteItem, loadState, toggleDone } from './actionCreators';
-import { NotifierContext } from './Notifier';
+import { addItem, deleteItem, loadState, toggleDone } from '@src/actions/creators/actionCreators';
+import { NotifierContext } from '@src/context/Notifier';
+import { ADD, REMOVE, TOGGLE_DONE, LOAD_STATE } from '@actions/types/actionTypes'
 
 export interface TodoItem {
     id: string;
@@ -25,8 +26,8 @@ export interface TodoItemsState {
 }
 
 export interface TodoItemsAction {
-    type: 'loadState' | 'add' | 'delete' | 'toggleDone';
-    data: TodoItemsState | Partial<TodoItem>
+    type: typeof LOAD_STATE | typeof ADD | typeof REMOVE | typeof TOGGLE_DONE;
+    data: TodoItemsState | Partial<TodoItem>;
 }
 
 const TodoItemsContext = createContext<
@@ -95,10 +96,10 @@ export const useTodoItems = () => {
 
 function todoItemsReducer(state: TodoItemsState, action: TodoItemsAction): TodoItemsState {
     switch (action.type) {
-        case 'loadState': {
+        case LOAD_STATE: {
             return action.data as TodoItemsState;
         }
-        case 'add':
+        case ADD:
             return {
                 ...state,
                 todoItems: [
@@ -106,14 +107,14 @@ function todoItemsReducer(state: TodoItemsState, action: TodoItemsAction): TodoI
                     ...state.todoItems,
                 ],
             };
-        case 'delete':
+        case REMOVE:
             return {
                 ...state,
                 todoItems: state.todoItems.filter(
                     ({ id }) => id !== (action.data as TodoItem).id,
                 ),
             };
-        case 'toggleDone':
+        case TOGGLE_DONE:
             const itemIndex = state.todoItems.findIndex(
                 ({ id }) => id === (action.data as TodoItem).id,
             );
