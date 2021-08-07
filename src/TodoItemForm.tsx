@@ -64,7 +64,7 @@ export default function TodoItemForm() {
                     <TextField
                         {...field}
                         label="TODO"
-                        fullWidth={true}
+                        fullWidth
                         className={classes.root}
                     />
                 )}
@@ -77,8 +77,8 @@ export default function TodoItemForm() {
                     <TextField
                         {...field}
                         label="Details"
-                        fullWidth={true}
-                        multiline={true}
+                        fullWidth
+                        multiline
                         className={classes.root}
                     />
                 )}
