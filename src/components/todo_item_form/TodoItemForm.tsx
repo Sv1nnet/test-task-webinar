@@ -51,6 +51,11 @@ export default function TodoItemForm() {
     return (
         <form
             onSubmit={handleSubmit((formData: TodoItem) => {
+                const { hours, minutes } = formData
+                if (!hours !== !minutes) {
+                    formData.hours = hours || '0'
+                    formData.minutes = minutes || '0'
+                }
                 add(formData);
                 reset({ title: '', details: '', hours: '', minutes: '' });
             })}
