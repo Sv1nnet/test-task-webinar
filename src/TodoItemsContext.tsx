@@ -4,29 +4,33 @@ import {
     useContext,
     useEffect,
     useReducer,
+    Reducer,
 } from 'react';
 
 export interface TodoItem {
     id: string;
     title: string;
     details?: string;
+    hours?: string;
+    minutes?: string;
+    date?: number
     done: boolean;
 }
 
-interface TodoItemsState {
+export interface TodoItemsState {
     todoItems: TodoItem[];
 }
 
-interface TodoItemsAction {
+export interface TodoItemsAction {
     type: 'loadState' | 'add' | 'delete' | 'toggleDone';
-    data: any;
+    data: TodoItemsState | Partial<TodoItem>
 }
 
 const TodoItemsContext = createContext<
     (TodoItemsState & { dispatch: (action: TodoItemsAction) => void }) | null
 >(null);
 
-const defaultState = { todoItems: [] };
+const defaultState: TodoItemsState = { todoItems: [] };
 const localStorageKey = 'todoListState';
 
 export const TodoItemsContextProvider = ({
@@ -34,8 +38,8 @@ export const TodoItemsContextProvider = ({
 }: {
     children?: ReactNode;
 }) => {
-    const [state, dispatch] = useReducer(todoItemsReducer, defaultState);
-
+    const [state, dispatch] = useReducer<Reducer<TodoItemsState, TodoItemsAction>>(todoItemsReducer, defaultState);
+    
     useEffect(() => {
         const savedState = localStorage.getItem(localStorageKey);
 
@@ -69,29 +73,37 @@ export const useTodoItems = () => {
     return todoItemsContext;
 };
 
-function todoItemsReducer(state: TodoItemsState, action: TodoItemsAction) {
+function todoItemsReducer(state: TodoItemsState, action: TodoItemsAction): TodoItemsState {
     switch (action.type) {
         case 'loadState': {
-            return action.data;
+            return action.data as TodoItemsState;
         }
-        case 'add':
+        case 'add': {
+            let item = action.data as TodoItem
+            const dateNow = new Date()
+            const itemDate = item.hours && item.minutes
+                ? new Date(dateNow.getFullYear(), dateNow.getMonth(), dateNow.getDate(), +item.hours, +item.minutes )
+                : 0
+
+            item = { ...item, id: generateId(), done: false, date: itemDate.valueOf() }
             return {
                 ...state,
                 todoItems: [
-                    { id: generateId(), done: false, ...action.data.todoItem },
+                    { ...item },
                     ...state.todoItems,
                 ],
             };
+        }
         case 'delete':
             return {
                 ...state,
                 todoItems: state.todoItems.filter(
-                    ({ id }) => id !== action.data.id,
+                    ({ id }) => id !== (action.data as TodoItem).id,
                 ),
             };
         case 'toggleDone':
             const itemIndex = state.todoItems.findIndex(
-                ({ id }) => id === action.data.id,
+                ({ id }) => id === (action.data as TodoItem).id,
             );
             const item = state.todoItems[itemIndex];
 
@@ -112,4 +124,4 @@ function generateId() {
     return `${Date.now().toString(36)}-${Math.floor(
         Math.random() * 1e16,
     ).toString(36)}`;
-}
+  }

@@ -63,6 +63,12 @@ const useTodoItemCardStyles = makeStyles({
         textDecoration: 'line-through',
         color: '#888888',
     },
+    header: {
+        paddingBottom: 0,
+    },
+    time: {
+        paddingTop: 0
+    }
 });
 
 export const TodoItemCard = function ({ item }: { item: TodoItem }) {
@@ -83,6 +89,15 @@ export const TodoItemCard = function ({ item }: { item: TodoItem }) {
         [item.id, dispatch],
     );
 
+    const getCardTime = () => {
+        if (!item.date) return null
+    
+        const taskDate = new Date(item.date)
+        const [hours, minutes] = [taskDate.getHours(), taskDate.getMinutes()]
+        const time = `${hours > 10 ? hours : `0${hours}`}:${minutes > 10 ? minutes : `0${minutes}`}`
+        return time
+    }
+
     return (
         <Card
             className={classnames(classes.root, {
@@ -90,6 +105,7 @@ export const TodoItemCard = function ({ item }: { item: TodoItem }) {
             })}
         >
             <CardHeader
+                className={classnames(!!item.date && classes.header)}
                 action={
                     <IconButton aria-label="delete" onClick={handleDelete}>
                         <DeleteIcon />
@@ -109,6 +125,13 @@ export const TodoItemCard = function ({ item }: { item: TodoItem }) {
                     />
                 }
             />
+            {item.date ? (
+                <CardContent className={classes.time}>
+                    <Typography variant="body2">
+                        {getCardTime()}
+                    </Typography>
+                </CardContent>
+            ) : null}
             {item.details ? (
                 <CardContent>
                     <Typography variant="body2" component="p">
